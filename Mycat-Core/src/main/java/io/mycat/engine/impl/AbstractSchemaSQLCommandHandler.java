@@ -75,6 +75,9 @@ public abstract class AbstractSchemaSQLCommandHandler implements SQLCommandHandl
 			final ByteBuffer byteBuff = dataBuffer.getBytes(pkgStartPos, pkgLen);
 			initDb(frontCon, byteBuff);
 			break;
+		case MySQLPacket.COM_FIELD_LIST:
+            fieldListCommand(frontCon, dataBuffer, packageType, pkgStartPos, pkgLen);
+            break;
 		default:
 			doSQLCommand(frontCon, dataBuffer, packageType, pkgStartPos, pkgLen);
 		}
@@ -96,6 +99,17 @@ public abstract class AbstractSchemaSQLCommandHandler implements SQLCommandHandl
 			LOGGER.debug("C#{}B#{} init-db ok: schema = {}", frontCon.getId(), byteBuffer.hashCode(), db);
 		}
 	}
+
+    private void fieldListCommand(final MySQLFrontConnection frontCon, final ConDataBuffer dataBuffer, byte packageType,
+                                  int pkgStartPos, int pkgLen) throws IOException {
+        LOGGER.debug("show the fields of table");
+        SchemaBean mycatSchema = frontCon.getMycatSchema();
+        if (mycatSchema == null) {
+            frontCon.writeErrMessage(ErrorCode.ER_NO_DB_ERROR, "No database selected");
+            return;
+        }
+        passThroughSQL(frontCon, dataBuffer, pkgStartPos, pkgLen);
+    }
 	
 	private void doSQLCommand(MySQLFrontConnection frontCon, ConDataBuffer dataBuffer, byte packageType,
 			int pkgStartPos, int pkgLen) throws IOException {
