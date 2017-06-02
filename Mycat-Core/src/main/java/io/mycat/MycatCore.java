@@ -73,7 +73,7 @@ public class MycatCore {
         SharedBufferPool sharedPool = new SharedBufferPool(1024 * 1024 * 100, 1024);
         new NetSystem(sharedPool, businessExecutor, timerExecutor);
         // Reactor pool
-        NIOReactorPool reactorPool = new NIOReactorPool("Reactor Pool", 5, sharedPool);
+        NIOReactorPool reactorPool = new NIOReactorPool("Reactor Pool", 5);
         SQLEngineCtx.INSTANCE().initReactorMap(reactorPool.getAllReactors());
         NIOConnector connector = new NIOConnector("NIOConnector", reactorPool);
         connector.start();

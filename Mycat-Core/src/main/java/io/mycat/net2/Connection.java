@@ -1,5 +1,6 @@
 package io.mycat.net2;
 
+import io.mycat.front.MySQLFrontConnection;
 import io.mycat.util.StringUtil;
 
 import java.io.IOException;
@@ -152,6 +153,14 @@ public abstract class Connection implements ClosableConnection {
 
     }
 
+    public void setReadDataBuffer(ConDataBuffer readDataBuffer) {
+        this.readDataBuffer = readDataBuffer;
+    }
+
+    public void setWriteDataBuffer(ConDataBuffer writeDataBuffer) {
+        this.writeDataBuffer = writeDataBuffer;
+    }
+
     public ConDataBuffer getWriteDataBuffer() {
 		return writeDataBuffer;
 	}
@@ -274,15 +283,15 @@ public abstract class Connection implements ClosableConnection {
 	}
 
 	@SuppressWarnings("unchecked")
-    public void register(Selector selector, ReactorBufferPool myBufferPool) throws IOException {
+    public void register(Selector selector, SharedBufferPool myBufferPool) throws IOException {
         processKey = channel.register(selector, SelectionKey.OP_READ, this);
         NetSystem.getInstance().addConnection(this);
        // boolean isLinux=GenelUtil.isLinuxSystem();
         //String maprFileName=isLinux? "/dev/zero":id+".rtmp";
         //String mapwFileName=isLinux? "/dev/zero":id+".wtmp";
-        String maprFileName=id+".rtmp";
-        String mapwFileName=id+".wtmp";
-        LOGGER.info("connection bytebuffer mapped "+maprFileName);
+        //String maprFileName=id+".rtmp";
+        //String mapwFileName=id+".wtmp";
+        //LOGGER.info("connection bytebuffer mapped "+maprFileName);
 
         //TODO
         /**使用MyCatMemoryAllocator分配Direct Buffer,再进行SocketChannel通信时候，
@@ -290,8 +299,13 @@ public abstract class Connection implements ClosableConnection {
          * 底层最终还是生成一个临时的Direct Buffer，用临时Direct Buffer写入或者读SocketChannel中
          * 后面考虑会使用netty中ByteBuf中的DirectBuffer进行网络IO通信。效率更高
          * */
-        this.readDataBuffer =new MappedFileConDataBuffer(maprFileName); // 2 ,3
-        this.writeDataBuffer=new MappedFileConDataBuffer3(mapwFileName);
+        if (direction==Direction.in) {
+            this.readDataBuffer = new DirectConDataBuffer(myBufferPool); // 2 ,3
+            this.writeDataBuffer = new DirectConDataBuffer(myBufferPool);
+        }else {
+            this.readDataBuffer = new DirectConDataBuffer(); // 2 ,3
+            this.writeDataBuffer = new DirectConDataBuffer();
+        }
         //存在bug暂不启用，以后统一是ByteBuf作为buffer进行NIO网络通信。
        // this.readDataBuffer = new  ByteBufConDataBuffer(4096,16*1024*1024);
        // this.writeDataBuffer = new ByteBufConDataBuffer(4096,16*1024*1024);

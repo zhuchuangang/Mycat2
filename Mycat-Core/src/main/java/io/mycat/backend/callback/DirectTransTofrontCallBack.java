@@ -50,9 +50,9 @@ public class DirectTransTofrontCallBack  implements BackConnectionCallback{
 			int pkgLen) throws IOException {
 		 LOGGER.debug("Direct Trans To front CallBack."+source);
 	        MySQLFrontConnection frontCon=getFrontCon(source);
-	        frontCon.getWriteDataBuffer().putBytes(dataBuffer.getBytes(pkgStartPos, pkgLen));
+	        //frontCon.getWriteDataBuffer().putBytes(dataBuffer.getBytes(pkgStartPos, pkgLen));
         	frontCon.enableWrite(false);
-	        source.setNextStatus(packageType);
+	        //source.setNextStatus(packageType);
 	       
 	        if (source.getState()== Connection.STATE_IDLE)
 	        {

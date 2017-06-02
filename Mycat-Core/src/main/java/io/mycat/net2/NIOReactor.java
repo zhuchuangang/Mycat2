@@ -10,6 +10,8 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import io.mycat.backend.MySQLBackendConnection;
+import io.mycat.front.MySQLFrontConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,9 +26,9 @@ public final class NIOReactor {
 	private final RWThread reactorR;
 	private final SharedBufferPool shearedBufferPool;
 
-	public NIOReactor(String name, SharedBufferPool shearedBufferPool) throws IOException {
+	public NIOReactor(String name) throws IOException {
 		this.name = name;
-		this.shearedBufferPool = shearedBufferPool;
+		this.shearedBufferPool = new SharedBufferPool(1024 * 1024 * 100, 1024*1024);
 		this.reactorR = new RWThread(name+"-RW");
 	}
 	public String getName()
@@ -67,12 +69,13 @@ public final class NIOReactor {
 		private final Selector selector;
 		private final ConcurrentLinkedQueue<Connection> registerQueue;
 		private long reactCount;
-		private final ReactorBufferPool myBufferPool;
+		private final SharedBufferPool myBufferPool;
         private java.util.concurrent.CopyOnWriteArrayList<Runnable> events=new CopyOnWriteArrayList<Runnable>();
 		private RWThread(String name) throws IOException {
 			this.setName(name);
 			this.selector = Selector.open();
-			myBufferPool = new ReactorBufferPool(shearedBufferPool, this, 1000);
+			//myBufferPool = new ReactorBufferPool(shearedBufferPool, this, 1000);
+			this.myBufferPool=shearedBufferPool;
 			this.registerQueue = new ConcurrentLinkedQueue<Connection>();
 		}
 

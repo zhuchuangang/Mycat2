@@ -28,6 +28,7 @@ import java.nio.channels.SocketChannel;
 
 import io.mycat.backend.callback.DummyCallBack;
 import io.mycat.beans.MySQLBean;
+import io.mycat.net2.Connection;
 import io.mycat.net2.NetSystem;
 /**
  * bakcend mysql connection factory
@@ -56,6 +57,7 @@ public class MySQLBackendConnectionFactory {
         c.setPool(pool);
         c.setNIOReactor(reactor);
         c.setUserCallback(dummyCallBack);
+        c.setDirection(Connection.Direction.out);
         c.setIdleTimeout(NetSystem.getInstance().getNetConfig().getConIdleTimeout()*60*1000L);
         NetSystem.getInstance().getConnector().postConnect(c);
         return c;

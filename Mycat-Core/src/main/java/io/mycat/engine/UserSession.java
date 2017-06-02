@@ -39,6 +39,10 @@ public class UserSession  {
 	 private static final Logger LOGGER = LoggerFactory.getLogger(UserSession.class);	
 private SQLCommandHandler curCmdHandler;	
 private ArrayList<MySQLBackendConnection> backConLst=new  ArrayList<MySQLBackendConnection>();
+//还有多少字节包头或包体读完
+private int leftSize=0;
+//如果是包头没有读完，那么缓存上次度过的一部分包头，header大小为4个字节
+private byte[] header;
 public void changeCmdHandler(SQLCommandHandler newCmdHandler)
 {
 	
@@ -79,8 +83,19 @@ public  ArrayList<MySQLBackendConnection> getBackendCons() {
 	return backConLst;
 }
 
+	public int getLeftSize() {
+		return leftSize;
+	}
 
-	
-	
+	public void setLeftSize(int leftSize) {
+		this.leftSize = leftSize;
+	}
 
+	public byte[] getHeader() {
+		return header;
+	}
+
+	public void setHeader(byte[] header) {
+		this.header = header;
+	}
 }

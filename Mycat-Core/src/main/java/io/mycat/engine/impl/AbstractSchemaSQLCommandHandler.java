@@ -264,7 +264,9 @@ public abstract class AbstractSchemaSQLCommandHandler implements SQLCommandHandl
 				/**
 				 * 将数据写到后端连接池中
 				 */
-				newCon.getWriteDataBuffer().putBytes(dataBuffer.getBytes(pkgStartPos,pkgLen));
+				newCon.setWriteDataBuffer(dataBuffer);
+				newCon.setReadDataBuffer(frontCon.getWriteDataBuffer());
+				//newCon.getWriteDataBuffer().putBytes(dataBuffer.getBytes(pkgStartPos,pkgLen));
 				newCon.enableWrite(false);
 				/**
 				 * 新建立的连接放到连接池中
@@ -275,7 +277,9 @@ public abstract class AbstractSchemaSQLCommandHandler implements SQLCommandHandl
 			/**
 			 * 否则直接写到后端即可
 			 */
-			existCon.getWriteDataBuffer().putBytes(dataBuffer.getBytes(pkgStartPos, pkgLen));
+			existCon.setWriteDataBuffer(dataBuffer);
+			existCon.setReadDataBuffer(frontCon.getWriteDataBuffer());
+			//existCon.getWriteDataBuffer().putBytes(dataBuffer.getBytes(pkgStartPos, pkgLen));
 			existCon.enableWrite(false);
 			existCon.setUserCallback(directTransCallback);
 		}

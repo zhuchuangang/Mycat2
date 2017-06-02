@@ -67,19 +67,21 @@ public class MySQLFrontConnectionHandler implements NIOHandler<MySQLFrontConnect
     public void handleReadEvent(final MySQLFrontConnection cnxn) throws IOException{
         LOGGER.debug("handleReadEvent(): {}", cnxn);
         final ConDataBuffer buffer = cnxn.getReadDataBuffer();
-        int offset = buffer.readPos(), limit = buffer.writingPos();
+        int offset = buffer.readPos(), limit = buffer.writingPos(),initOffset=offset;
         // 读取到了包头和长度
 		// 是否讀完一個報文
 		for(; ; ) {
 			if(!MySQLConnection.validateHeader(offset, limit)) {
 				LOGGER.debug("C#{}B#{} validate protocol packet header: too short, ready to handle next the read event",
 					cnxn.getId(), buffer.hashCode());
+				buffer.setReadingPos(initOffset);
 				return; 
 			}
 			int length = MySQLConnection.getPacketLength(buffer, offset);
 			if((length + offset) > limit) {
 				 LOGGER.debug("C#{}B#{} nNot a whole packet: required length = {} bytes, cur total length = {} bytes, "
 				 	+ "ready to handle the next read event", cnxn.getId(), buffer.hashCode(), length, limit);
+				buffer.setReadingPos(initOffset);
 				return;
 			}
 			if(length == 4){
